@@ -66,12 +66,12 @@ services:
     
     bridge-server:
         container_name: bridge_server
-        build: ./bridge_server
+        build: ./bridge-server
         ports:
             - "8002:8002"
         volumes:
-            - ./bridge_server/app.py:/app/app.py
-            - ./bridge_server/dag_mapping.py:/app/dag_mapping.py
+            - ./bridge-server/app.py:/app/app.py
+            - ./bridge-server/dag_mapping.py:/app/dag_mapping.py
         restart: always
     
     postgres:
@@ -124,6 +124,45 @@ services:
             - rabbitmq
         build: ./workers
         restart: always
+
+    # zookeeper:
+    #     image: confluentinc/cp-zookeeper:latest
+    #     ports:
+    #         - "2181:2181"
+    #     environment:
+    #         ZOOKEEPER_CLIENT_PORT: 2181
+    #         ZOOKEEPER_TICK_TIME: 2000
+    #         KAFKA_JMX_PORT: 39999
+
+    # kafka:
+    #     image: confluentinc/cp-kafka:latest
+    #     restart: always
+    #     depends_on:
+    #         - zookeeper
+    #     ports:
+    #         - "9092:9092"
+    #     environment:
+    #         KAFKA_BROKER_ID: 1
+    #         KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    #         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+    #         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+    #         KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    #         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    #         KAFKA_JMX_PORT: 49999
+
+    # kafka-manager:
+    #     image: kafkamanager/kafka-manager
+    #     restart: always
+    #     depends_on:
+    #         - zookeeper
+    #         - kafka
+    #     ports:
+    #         - "9000:9000"
+    #     environment:
+    #         ZK_HOSTS: "zookeeper:2181"
+    #     volumes: 
+    #         - ./nginx.conf:/etc/nginx/nginx.conf
+
 
     mlflow:
         container_name: mlflow-server
@@ -182,11 +221,15 @@ services:
         image: grafana/grafana:6.3.6
         depends_on:
             - influxdb
+            - prometheus
         user: "0"
         ports:
             - 3000:3000
         env_file:
             - ./grafana/grafana.env
+        volumes:
+            - ./grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources/
+            - ./grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
         restart: always
     
     redis:
