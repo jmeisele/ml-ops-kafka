@@ -19,10 +19,10 @@ datasources:
     url: http://influxdb:8086
     basicAuth: True
     isDefault: False
-    user: ml-ops-admin
+    user: grafana
     database: mlopsdemo
     secureJsonData:
-      basicAuthPassword: ml-ops-pwd
+      basicAuthPassword: grafana
     jsonData: 
         httpMethod: GET
         keepCookies: []
