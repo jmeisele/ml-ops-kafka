@@ -101,24 +101,6 @@ services:
           - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
         restart: always
 
-    # rabbitmq:
-    #     container_name: rabbitmq
-    #     image: rabbitmq:3-management-alpine
-    #     volumes:
-    #         - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json
-    #     ports:
-    #         - "15672:15672"
-    #         - "5672:5672"
-    #         - "15692:15692"
-    #     restart: always
-
-    # rabbitmq-workers:
-    #     container_name: rabbitmq-workers
-    #     depends_on:
-    #         - rabbitmq
-    #     build: ./workers
-    #     restart: always
-
     zookeeper:
         image: confluentinc/cp-zookeeper:latest
         ports:
