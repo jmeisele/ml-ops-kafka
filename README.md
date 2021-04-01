@@ -119,8 +119,7 @@ Make sure docker is running and you have [Docker Compose](https://docs.docker.co
 - python-model-service1: FastAPI Machine Learning API 1
 - python-model-service2: FastAPI Machine Learning API 2
 - postgresql: RDBMS
-- rabbitmq: Message Queue
-- rabbitmq workers: Workers listening to RabbitMQ
+- kafka: Event streaming platform
 - locust: Load testing and simulate production traffic
 - prometheus: Metrics scraping
 - minio: Object storage
