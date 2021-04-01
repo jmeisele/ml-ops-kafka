@@ -230,6 +230,7 @@ services:
         volumes:
             - ./grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources/
             - ./grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
+            - ./grafana/provisioning/notifiers/:/etc/grafana/provisioning/notifiers/
         restart: always
     
     redis:
