@@ -41,7 +41,7 @@ services:
     python-model-service1:
         container_name: python-service-1
         depends_on:
-            - rabbitmq
+            - kafka
         build:
             context: ./python-model-service-1
             dockerfile: Dockerfile
@@ -54,7 +54,7 @@ services:
     python-model-service2:
         container_name: python-service-2
         depends_on:
-            - rabbitmq
+            - kafka
         build: 
             context: ./python-model-service-2
             dockerfile: Dockerfile
@@ -95,60 +95,63 @@ services:
         depends_on:
             - python-model-service1
             - python-model-service2
-            - rabbitmq
         ports:
             - "9090:9090"
         volumes:
           - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
         restart: always
 
-    rabbitmq:
-        container_name: rabbitmq
-        image: rabbitmq:3-management-alpine
-        volumes:
-            - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json
-        # environment:
-        #     RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
-        #     RABBITMQ_DEFAULT_USER: "guest"
-        #     RABBITMQ_DEFAULT_PASS: "guest"
-        #     RABBITMQ_DEFAULT_VHOST: "/"
-        ports:
-            - "15672:15672"
-            - "5672:5672"
-            - "15692:15692"
-        restart: always
+    # rabbitmq:
+    #     container_name: rabbitmq
+    #     image: rabbitmq:3-management-alpine
+    #     volumes:
+    #         - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json
+    #     ports:
+    #         - "15672:15672"
+    #         - "5672:5672"
+    #         - "15692:15692"
+    #     restart: always
 
-    rabbitmq-workers:
-        container_name: rabbitmq-workers
+    # rabbitmq-workers:
+    #     container_name: rabbitmq-workers
+    #     depends_on:
+    #         - rabbitmq
+    #     build: ./workers
+    #     restart: always
+
+    zookeeper:
+        image: confluentinc/cp-zookeeper:latest
+        ports:
+            - "2181:2181"
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+            KAFKA_JMX_PORT: 39999
+
+    kafka:
+        image: confluentinc/cp-kafka:latest
+        container_name: kafka
+        restart: always
         depends_on:
-            - rabbitmq
+            - zookeeper
+        ports:
+            - "9092:9092"
+        # https://rmoff.net/2018/08/02/kafka-listeners-explained/
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_JMX_PORT: 49999
+    
+    kafka-workers:
+        container_name: kafka-workers
+        depends_on:
+            - kafka
         build: ./workers
         restart: always
-
-    # zookeeper:
-    #     image: confluentinc/cp-zookeeper:latest
-    #     ports:
-    #         - "2181:2181"
-    #     environment:
-    #         ZOOKEEPER_CLIENT_PORT: 2181
-    #         ZOOKEEPER_TICK_TIME: 2000
-    #         KAFKA_JMX_PORT: 39999
-
-    # kafka:
-    #     image: confluentinc/cp-kafka:latest
-    #     restart: always
-    #     depends_on:
-    #         - zookeeper
-    #     ports:
-    #         - "9092:9092"
-    #     environment:
-    #         KAFKA_BROKER_ID: 1
-    #         KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    #         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-    #         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-    #         KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    #         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    #         KAFKA_JMX_PORT: 49999
 
     # kafka-manager:
     #     image: kafkamanager/kafka-manager
@@ -162,7 +165,6 @@ services:
     #         ZK_HOSTS: "zookeeper:2181"
     #     volumes: 
     #         - ./nginx.conf:/etc/nginx/nginx.conf
-
 
     mlflow:
         container_name: mlflow-server

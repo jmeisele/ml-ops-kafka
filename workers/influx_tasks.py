@@ -10,7 +10,7 @@ from influxdb import InfluxDBClient
 from loguru import logger
 
 
-def callback(ch, method, properties, body):
+def callback(body) -> None:
     # Deserialize the byte array from bytes to string and format body into dict
     body = body.decode("utf-8")
     logger.debug(f"Body: {body}")
@@ -20,7 +20,7 @@ def callback(ch, method, properties, body):
     logger.debug(body)
 
 
-def insert_record(ch, method, properties, body):
+def insert_record(body) -> None:
     # Create a client object
     client = InfluxDBClient(host="influxdb",
                             port=8086,

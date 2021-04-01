@@ -10,10 +10,10 @@ from app.data_models.prediction import HousePredictionResult
 # ML Model object itself
 from app.services.models import HousePriceModel
 # Background task
-from app.api.tasks.queue import add_message_to_queue
+from app.api.tasks.send_kafka import add_message_to_kafka
 
-from fastapi import APIRouter, BackgroundTasks
 from starlette.requests import Request
+from fastapi import APIRouter, BackgroundTasks
 
 router = APIRouter()
 
@@ -26,11 +26,12 @@ async def post_predict(request: Request,
     model: HousePriceModel = request.app.state.model
     prediction: HousePredictionResult = model.predict(block_data)
     backgound_tasks.add_task(
-        add_message_to_queue,
-        body=str(
-            {"request": await request.json(),
-             "median_house_value": prediction.median_house_value,
-             "model_version": model.version}
+        add_message_to_kafka,
+        topic="ml-ops",
+        value={
+            "request": await request.json(),
+            "median_house_value": prediction.median_house_value,
+            "model_version": model.version
+            }
         )
-    )
     return prediction
