@@ -13,7 +13,7 @@ Make sure docker is running and you have [Docker Compose](https://docs.docker.co
 
 1. Clone the project
     ```bash
-    git clone https://github.com/jmeisele/ml-ops.git
+    git clone https://github.com/jmeisele/ml-ops-kafka.git
     ```
 2. Change directories into the repo
     ```bash
