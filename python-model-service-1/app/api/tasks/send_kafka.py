@@ -5,7 +5,6 @@ Scope: Function to send message to Kafka
 """
 import json
 import os
-import certifi
 
 from confluent_kafka import Producer
 from loguru import logger
@@ -18,15 +17,12 @@ def acked(err, msg):
         print(f"Message produced: {msg}")
 
 
-def add_message_to_kafka(topic: str, key: str, value: dict):
+def add_message_to_kafka(topic: str, value: dict):
     try:
-        conf = {'bootstrap.servers': os.getenv("KAFKA_BROKERS"),
-                'security.protocol': 'SASL_SSL',
-                'sasl.username': os.getenv("KAFKA_KEY"),
-                'sasl.password': os.getenv("KAFKA_SECRET"),
-                'sasl.mechanism': 'PLAIN',
-                'ssl.ca.location': certifi.where()
-                }
+        """ Needed for connecting to local Kafka Broker on the Docker network"""
+        # conf = {'bootstrap.servers': "localhost:9092"}
+        conf = {'bootstrap.servers': "kafka:29092"}
+
         # Create Producer instance
         p = Producer(**conf)
         logger.debug("Connected to Kafka Broker")
@@ -34,13 +30,12 @@ def add_message_to_kafka(topic: str, key: str, value: dict):
         logger.error(f"Could not connect to Kafka broker due to: {e}")
     try:
         p.produce(
-            topic=os.getenv("TEST_ML_MODEL_PREDICT_TOPIC"),
-            key=key,
+            topic=topic,
             value=json.dumps(value),
             callback=acked
         )
         logger.debug(
-            f"sent to topic: {os.getenv('TEST_ML_MODEL_PREDICT_TOPIC')}"
+            f"sent to topic: {topic}"
         )
         p.flush()
     except Exception as e:
