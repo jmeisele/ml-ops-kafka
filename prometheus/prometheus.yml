@@ -18,20 +18,17 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
   
-  - job_name: 'rabbitmq'
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['rabbitmq:15692']
-      # - targets: ['localhost:15692']
-
   - job_name: 'python-model-service-1'
     scrape_interval: 5s
     static_configs:
       - targets: ['python-service-1:8000']
-      # - targets: ['localhost:8000']
 
   - job_name: 'python-model-service-2'
     scrape_interval: 5s
     static_configs:
       - targets: ['python-service-2:8001']
-      # - targets: ['localhost:8001']
+
+  - job_name: 'kafka'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['kafka:7071']
