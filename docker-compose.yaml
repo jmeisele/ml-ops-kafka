@@ -95,6 +95,7 @@ services:
         depends_on:
             - python-model-service1
             - python-model-service2
+            - kafka
         ports:
             - "9090:9090"
         volumes:
@@ -118,6 +119,8 @@ services:
             - zookeeper
         ports:
             - "9092:9092"
+            - "7071:7071"
+            - "49999:49999"
         # https://rmoff.net/2018/08/02/kafka-listeners-explained/
         environment:
             KAFKA_BROKER_ID: 1
@@ -127,7 +130,11 @@ services:
             KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
             KAFKA_JMX_PORT: 49999
-    
+            KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar=7071:/etc/jmx-exporter/kafka-2_0_0.yml"
+        volumes:
+            - ./kafka/jmx-exporter/kafka-2_0_0.yml:/etc/jmx-exporter/kafka-2_0_0.yml
+            - ./kafka/jmx-exporter/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar
+
     kafka-workers:
         container_name: kafka-workers
         depends_on:
