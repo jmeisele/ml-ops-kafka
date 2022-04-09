@@ -29,7 +29,7 @@ Make sure docker is running and you have [Docker Compose](https://docs.docker.co
    ```bash
    docker-compose pull && docker-compose up
    ```
-5. Open a browser and log in to [MinIO](http://localhost:9000)
+5. Open a browser and log in to [MinIO](http://localhost:9001)
 
    user: _minioadmin_
 
