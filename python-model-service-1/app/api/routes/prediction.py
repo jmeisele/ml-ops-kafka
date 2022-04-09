@@ -12,6 +12,7 @@ from app.services.models import HousePriceModel
 # Background task
 from app.api.tasks.send_kafka import add_message_to_kafka
 
+from confluent_kafka import Producer
 from starlette.requests import Request
 from fastapi import APIRouter, BackgroundTasks
 
@@ -25,8 +26,10 @@ async def post_predict(request: Request,
                        ) -> HousePredictionResult:
     model: HousePriceModel = request.app.state.model
     prediction: HousePredictionResult = model.predict(block_data)
+    kafka_producer: Producer = request.app.state.kafka_producer
     backgound_tasks.add_task(
         add_message_to_kafka,
+        producer=kafka_producer,
         topic="ml-ops",
         value={
             "request": await request.json(),
